@@ -39,8 +39,12 @@ def create_advanced_cnn_simplernn_model(max_features=20000, maxlen=500, embeddin
         BatchNormalization(),
         MaxPooling1D(pool_size=2),
         
-        # 双向SimpleRNN层
-        Bidirectional(SimpleRNN(128, return_sequences=False)),
+        # 双向SimpleRNN层 - 堆叠两层
+        Bidirectional(SimpleRNN(128, return_sequences=True)),
+        BatchNormalization(),
+        Dropout(0.3),
+        
+        Bidirectional(SimpleRNN(64, return_sequences=False)),
         BatchNormalization(),
         Dropout(0.5),
         
@@ -54,7 +58,7 @@ def create_advanced_cnn_simplernn_model(max_features=20000, maxlen=500, embeddin
         
         # 输出层
         Dense(1, activation='sigmoid')
-    ], name='Advanced_CNN_SimpleRNN')
+    ], name='Advanced_CNN_BiSimpleRNN')
     
     return model
 
@@ -107,7 +111,7 @@ def create_advanced_cnn_gru_model(max_features=20000, maxlen=500, embedding_dim=
         
         # 输出层
         Dense(1, activation='sigmoid')
-    ], name='Advanced_CNN_GRU')
+    ], name='Advanced_CNN_BiGRU')
     
     return model
 
@@ -160,7 +164,7 @@ def create_advanced_cnn_lstm_model(max_features=20000, maxlen=500, embedding_dim
         
         # 输出层
         Dense(1, activation='sigmoid')
-    ], name='Advanced_CNN_LSTM')
+    ], name='Advanced_CNN_BiLSTM')
     
     return model
 
@@ -173,9 +177,9 @@ def get_all_advanced_models(max_features=20000, maxlen=500, embedding_dim=256):
         包含所有改进版模型的字典
     """
     models = {
-        'Advanced_CNN+SimpleRNN': create_advanced_cnn_simplernn_model(max_features, maxlen, embedding_dim),
-        'Advanced_CNN+GRU': create_advanced_cnn_gru_model(max_features, maxlen, embedding_dim),
-        'Advanced_CNN+LSTM': create_advanced_cnn_lstm_model(max_features, maxlen, embedding_dim)
+        'Advanced_CNN+BiSimpleRNN': create_advanced_cnn_simplernn_model(max_features, maxlen, embedding_dim),
+        'Advanced_CNN+BiGRU': create_advanced_cnn_gru_model(max_features, maxlen, embedding_dim),
+        'Advanced_CNN+BiLSTM': create_advanced_cnn_lstm_model(max_features, maxlen, embedding_dim)
     }
     
     return models

@@ -267,7 +267,7 @@ def main():
     set_seed(42)
 
     # 修改此列表可控制要运行的实验组
-    run_groups = ['classic','ultra','advanced']
+    run_groups = ['ultra','advanced']
 
     configs = [
         {

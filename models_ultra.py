@@ -146,10 +146,10 @@ def create_ultra_cnn_lstm_attention_model(max_features=20000, maxlen=500, embedd
 
     if return_attention:
         model = Model(inputs=inputs, outputs=[outputs, att_weights],
-                      name='Ultra_CNN_LSTM_Attention')
+                      name='Ultra_MSResCNN_LSTM_Attention')
     else:
         model = Model(inputs=inputs, outputs=outputs,
-                      name='Ultra_CNN_LSTM_Attention')
+                      name='Ultra_MSResCNN_LSTM_Attention')
 
     return model
 
@@ -224,10 +224,10 @@ def create_ultra_cnn_gru_attention_model(max_features=20000, maxlen=500, embeddi
 
     if return_attention:
         model = Model(inputs=inputs, outputs=[outputs, att_weights],
-                      name='Ultra_CNN_GRU_Attention')
+                      name='Ultra_MSResCNN_BiGRU_Attention')
     else:
         model = Model(inputs=inputs, outputs=outputs,
-                      name='Ultra_CNN_GRU_Attention')
+                      name='Ultra_MSResCNN_BiGRU_Attention')
 
     return model
 
@@ -293,10 +293,10 @@ def create_ultra_cnn_bigru_attention_model(max_features=20000, maxlen=500, embed
 
     if return_attention:
         model = Model(inputs=inputs, outputs=[outputs, att_weights],
-                      name='Ultra_CNN_BiGRU_Attention')
+                      name='Ultra_ResCNN_BiGRU_Attention')
     else:
         model = Model(inputs=inputs, outputs=outputs,
-                      name='Ultra_CNN_BiGRU_Attention')
+                      name='Ultra_ResCNN_BiGRU_Attention')
 
     return model
 
@@ -346,7 +346,7 @@ def create_ultra_textcnn_bilstm_model(max_features=20000, maxlen=500, embedding_
 
     outputs = Dense(1, activation='sigmoid')(dense1)
 
-    model = Model(inputs=inputs, outputs=outputs, name='Ultra_TextCNN_BiLSTM')
+    model = Model(inputs=inputs, outputs=outputs, name='Ultra_TextCNN_BiLSTM_PoolCat')
 
     return model
 
@@ -356,16 +356,16 @@ def get_all_ultra_models(max_features=20000, maxlen=500, embedding_dim=300):
     获取所有超级优化版模型
     """
     models = {
-        'Ultra_CNN+LSTM+Attention': create_ultra_cnn_lstm_attention_model(
+        'Ultra_MSResCNN+LSTM+Attention': create_ultra_cnn_lstm_attention_model(
             max_features, maxlen, embedding_dim
         ),
-        'Ultra_CNN+GRU+Attention': create_ultra_cnn_gru_attention_model(
+        'Ultra_MSResCNN+BiGRU+Attention': create_ultra_cnn_gru_attention_model(
             max_features, maxlen, embedding_dim
         ),
-        'Ultra_CNN+BiGRU+Attention': create_ultra_cnn_bigru_attention_model(
+        'Ultra_ResCNN+BiGRU+Attention': create_ultra_cnn_bigru_attention_model(
             max_features, maxlen, embedding_dim
         ),
-        'Ultra_TextCNN+BiLSTM': create_ultra_textcnn_bilstm_model(
+        'Ultra_TextCNN+BiLSTM_PoolCat': create_ultra_textcnn_bilstm_model(
             max_features, maxlen, embedding_dim
         )
     }

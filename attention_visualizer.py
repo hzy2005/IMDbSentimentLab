@@ -41,6 +41,9 @@ def extract_attention_weights(model, x_sample):
     if weights is None:
         return None
 
+    if tf.is_tensor(weights):
+        weights = weights.numpy()
+
     if weights.ndim == 3:
         weights = weights[0, :, 0]
     elif weights.ndim == 2:
@@ -54,10 +57,10 @@ def visualize_attention(tokens, weights, save_path, top_k=20):
 
     length = min(len(tokens), len(weights))
     tokens = tokens[:length]
-    weights = weights[:length]
+    weights = np.asarray(weights[:length])
 
-    keep_idx = [i for i, t in enumerate(tokens) if t != "<PAD>"]
-    tokens = [tokens[i] for i in keep_idx]
+    keep_idx = np.array([i for i, t in enumerate(tokens) if t != "<PAD>"], dtype=np.int64)
+    tokens = [tokens[i] for i in keep_idx.tolist()]
     weights = weights[keep_idx]
 
     if len(weights) == 0:
