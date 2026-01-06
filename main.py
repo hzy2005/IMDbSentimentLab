@@ -6,6 +6,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import numpy as np
+import math
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.datasets import imdb
@@ -140,11 +141,21 @@ def run_experiment(config):
     for name in models_dict.keys():
         print(f"  - {name}")
 
+    steps_per_epoch = math.ceil(x_train.shape[0] / config['batch_size'])
+
     for model_name, model in models_dict.items():
         if config.get('learning_rate') is None:
             config['compile_model'](model)
         else:
-            config['compile_model'](model, learning_rate=config['learning_rate'])
+            if config.get('key') == 'ultra':
+                config['compile_model'](
+                    model,
+                    learning_rate=config['learning_rate'],
+                    steps_per_epoch=steps_per_epoch,
+                    epochs=config['epochs']
+                )
+            else:
+                config['compile_model'](model, learning_rate=config['learning_rate'])
         print_model_summary(model)
 
     visualizer = Visualizer(save_dir=config['save_dir'])
