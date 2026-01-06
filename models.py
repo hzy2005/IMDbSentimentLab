@@ -120,6 +120,55 @@ def create_cnn_lstm_model(max_features=10000, maxlen=500, embedding_dim=128):
     return model
 
 
+def create_cnn_only_model(max_features=10000, maxlen=500, embedding_dim=128):
+    """
+    创建CNN-Only基线模型
+    
+    Args:
+        max_features: 词汇表大小
+        maxlen: 序列最大长度
+        embedding_dim: 词嵌入维度
+    
+    Returns:
+        Keras模型
+    """
+    model = Sequential([
+        Embedding(max_features, embedding_dim, input_length=maxlen),
+        Conv1D(filters=64, kernel_size=5, activation='relu'),
+        MaxPooling1D(pool_size=4),
+        Conv1D(filters=64, kernel_size=5, activation='relu'),
+        GlobalMaxPooling1D(),
+        Dense(64, activation='relu'),
+        Dropout(0.5),
+        Dense(1, activation='sigmoid')
+    ], name='CNN_Only')
+    
+    return model
+
+
+def create_pure_rnn_lstm_model(max_features=10000, maxlen=500, embedding_dim=128):
+    """
+    创建纯RNN基线模型（LSTM）
+    
+    Args:
+        max_features: 词汇表大小
+        maxlen: 序列最大长度
+        embedding_dim: 词嵌入维度
+    
+    Returns:
+        Keras模型
+    """
+    model = Sequential([
+        Embedding(max_features, embedding_dim, input_length=maxlen),
+        LSTM(64, return_sequences=False),
+        Dense(64, activation='relu'),
+        Dropout(0.5),
+        Dense(1, activation='sigmoid')
+    ], name='RNN_Only_LSTM')
+    
+    return model
+
+
 def get_all_models(max_features=10000, maxlen=500, embedding_dim=128):
     """
     获取所有模型
@@ -130,7 +179,9 @@ def get_all_models(max_features=10000, maxlen=500, embedding_dim=128):
     models = {
         'CNN+SimpleRNN': create_cnn_simplernn_model(max_features, maxlen, embedding_dim),
         'CNN+GRU': create_cnn_gru_model(max_features, maxlen, embedding_dim),
-        'CNN+LSTM': create_cnn_lstm_model(max_features, maxlen, embedding_dim)
+        'CNN+LSTM': create_cnn_lstm_model(max_features, maxlen, embedding_dim),
+        'CNN_Only': create_cnn_only_model(max_features, maxlen, embedding_dim),
+        'RNN_Only_LSTM': create_pure_rnn_lstm_model(max_features, maxlen, embedding_dim)
     }
     
     return models

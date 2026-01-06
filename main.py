@@ -226,35 +226,37 @@ def main():
             'learning_rate': 0.001,
             'save_dir': 'results',
             'show_sample': True
-        },
-        {
-            'key': 'advanced',
-            'title': '改进版',
-            'desc': '更深CNN + 双向RNN + BatchNorm/SpatialDropout',
-            'get_models': get_all_advanced_models,
-            'compile_model': compile_advanced_model,
-            'max_features': 20000,
-            'maxlen': 500,
-            'embedding_dim': 256,
-            'batch_size': 64,
-            'epochs': 30,
-            'learning_rate': 0.0005,
-            'save_dir': 'results_advanced'
-        },
-        {
-            'key': 'ultra',
-            'title': '超强版',
-            'desc': '多尺度CNN + 注意力 + TextCNN + BiLSTM（目标95%+）',
-            'get_models': get_all_ultra_models,
-            'compile_model': compile_ultra_model,
-            'max_features': 20000,
-            'maxlen': 500,
-            'embedding_dim': 300,
-            'batch_size': 32,
-            'epochs': 50,
-            'learning_rate': 0.0003,
-            'save_dir': 'results_ultra'
         }
+        # ,
+        # {
+        #     'key': 'advanced',
+        #     'title': '改进版',
+        #     'desc': '更深CNN + 双向RNN + BatchNorm/SpatialDropout',
+        #     'get_models': get_all_advanced_models,
+        #     'compile_model': compile_advanced_model,
+        #     'max_features': 20000,
+        #     'maxlen': 500,
+        #     'embedding_dim': 256,
+        #     'batch_size': 64,
+        #     'epochs': 30,
+        #     'learning_rate': 0.0005,
+        #     'save_dir': 'results_advanced'
+        # }
+        # ,
+        # {
+        #     'key': 'ultra',
+        #     'title': '超强版',
+        #     'desc': '多尺度CNN + 注意力 + TextCNN + BiLSTM（目标95%+）',
+        #     'get_models': get_all_ultra_models,
+        #     'compile_model': compile_ultra_model,
+        #     'max_features': 20000,
+        #     'maxlen': 500,
+        #     'embedding_dim': 300,
+        #     'batch_size': 32,
+        #     'epochs': 50,
+        #     'learning_rate': 0.0003,
+        #     'save_dir': 'results_ultra'
+        # }
     ]
 
     for cfg in configs:
