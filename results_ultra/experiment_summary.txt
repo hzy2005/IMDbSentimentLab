@@ -1,0 +1,26 @@
+超强版 - 实验要求对照说明
+============================================================
+1) 模型数量与类型
+   - CNN+RNN 三个及以上模型对比
+   - 当前模型列表:
+     * Ultra_CNN+LSTM+Attention
+     * Ultra_CNN+GRU+Attention
+     * Ultra_CNN+BiGRU+Attention
+     * Ultra_TextCNN+BiLSTM
+
+2) 模型结构输出
+   - results_ultra/Ultra_CNN_LSTM_Attention_structure.txt
+   - results_ultra/Ultra_CNN_GRU_Attention_structure.txt
+   - results_ultra/Ultra_CNN_BiGRU_Attention_structure.txt
+   - results_ultra/Ultra_TextCNN_BiLSTM_structure.txt
+
+3) 损失可视化输出
+   - results_ultra/Ultra_CNN_LSTM_Attention_training_history.png（含训练/验证损失曲线）
+   - results_ultra/Ultra_CNN_GRU_Attention_training_history.png（含训练/验证损失曲线）
+   - results_ultra/Ultra_CNN_BiGRU_Attention_training_history.png（含训练/验证损失曲线）
+   - results_ultra/Ultra_TextCNN_BiLSTM_training_history.png（含训练/验证损失曲线）
+   - results_ultra/all_models_comparison.png（含训练/验证损失对比）
+
+4) 对比分析结果
+   - results_ultra/detailed_results.txt
+   - results_ultra/results_comparison.png

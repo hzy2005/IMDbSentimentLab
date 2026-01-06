@@ -1,0 +1,23 @@
+改进版 - 实验要求对照说明
+============================================================
+1) 模型数量与类型
+   - CNN+RNN 三个及以上模型对比
+   - 当前模型列表:
+     * Advanced_CNN+SimpleRNN
+     * Advanced_CNN+GRU
+     * Advanced_CNN+LSTM
+
+2) 模型结构输出
+   - results_advanced/Advanced_CNN_SimpleRNN_structure.txt
+   - results_advanced/Advanced_CNN_GRU_structure.txt
+   - results_advanced/Advanced_CNN_LSTM_structure.txt
+
+3) 损失可视化输出
+   - results_advanced/Advanced_CNN_SimpleRNN_training_history.png（含训练/验证损失曲线）
+   - results_advanced/Advanced_CNN_GRU_training_history.png（含训练/验证损失曲线）
+   - results_advanced/Advanced_CNN_LSTM_training_history.png（含训练/验证损失曲线）
+   - results_advanced/all_models_comparison.png（含训练/验证损失对比）
+
+4) 对比分析结果
+   - results_advanced/detailed_results.txt
+   - results_advanced/results_comparison.png
