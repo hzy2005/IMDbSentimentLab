@@ -10,7 +10,7 @@ from tensorflow.keras.utils import to_categorical
 class IMDbDataLoader:
     """IMDb数据加载器"""
     
-    def __init__(self, max_features=10000, maxlen=500):
+    def __init__(self, max_features=10000, maxlen=300):
         """
         初始化数据加载器
         
@@ -40,8 +40,22 @@ class IMDbDataLoader:
         print(f"测试集大小: {len(x_test)}")
         
         # 填充序列到相同长度
-        self.x_train = sequence.pad_sequences(x_train, maxlen=self.maxlen)
-        self.x_test = sequence.pad_sequences(x_test, maxlen=self.maxlen)
+        
+        """
+        pad_sequences 默认是padding='pre',truncating='pre'  
+        序列长度不足的：前面补大量 0 序列过长的：从前面截断 
+        而 IMDb 评论的情感信息常常在开头（甚至标题、前几句）就出现，你这种截断会把开头截掉。
+
+        """
+    
+        # self.x_train = sequence.pad_sequences(x_train, maxlen=self.maxlen)
+        # self.x_test = sequence.pad_sequences(x_test, maxlen=self.maxlen)
+        self.x_train = sequence.pad_sequences(
+            x_train, maxlen=self.maxlen, padding='post', truncating='post'
+        )
+        self.x_test = sequence.pad_sequences(
+            x_test, maxlen=self.maxlen, padding='post', truncating='post'
+        )
         
         # 标签保持为0和1（二分类）
         self.y_train = y_train
@@ -82,6 +96,10 @@ class IMDbDataLoader:
             return None, None
         
         # 解码序列
-        decoded = ' '.join([reverse_word_index.get(i - 3, '?') for i in sequence_data if i > 0])
-        
+        # 这大体是对的，但你会把 1(start)、2(oov)也当成词处理，可能出现乱码
+        # decoded = ' '.join([reverse_word_index.get(i - 3, '?') for i in sequence_data if i > 0])
+        index_from = 3
+        decoded = ' '.join([reverse_word_index.get(i - index_from, '?') 
+                            for i in sequence_data if i >= index_from])
+
         return decoded, label

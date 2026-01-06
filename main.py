@@ -1,13 +1,14 @@
 """
 IMDb电影评论情感分析 - 统一主程序
-同时支持经典CNN+RNN与改进/超强CNN+RNN模型对比实验
+同时支持经典/改进/超强CNN+RNN模型对比实验
 """
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # 减少TensorFlow日志输出
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
+from tensorflow.keras.datasets import imdb
 
 from data_loader import IMDbDataLoader
 from models import get_all_models, compile_model, print_model_summary
@@ -15,6 +16,7 @@ from models_advanced import get_all_advanced_models, compile_advanced_model
 from models_ultra import get_all_ultra_models, compile_ultra_model
 from trainer import ModelTrainer, compare_models
 from visualizer import Visualizer
+from attention_visualizer import decode_review, extract_attention_weights, visualize_attention
 
 
 def set_seed(seed=42):
@@ -50,6 +52,47 @@ def _write_experiment_summary(save_dir, title, model_names):
         f.write(f"   - {save_dir}/detailed_results.txt\n")
         f.write(f"   - {save_dir}/results_comparison.png\n")
     print(f"实验要求对照说明已保存到: {summary_file}")
+
+
+def _select_indices_by_label(y, label, k):
+    indices = np.where(y == label)[0]
+    return indices[:k].tolist()
+
+
+def _run_attention_visualization(trainers, x_test, y_test, save_dir, word_index, top_k=20):
+    attention_dir = os.path.join(save_dir, "attention")
+    os.makedirs(attention_dir, exist_ok=True)
+
+    pos_indices = _select_indices_by_label(y_test, 1, 3)
+    neg_indices = _select_indices_by_label(y_test, 0, 3)
+    sample_list = [(i, "pos") for i in pos_indices] + [(i, "neg") for i in neg_indices]
+
+    for model_name, trainer in trainers.items():
+        if "Attention" not in model_name:
+            continue
+
+        print(f"\n[Attention] 模型: {model_name}")
+        model = trainer.model
+
+        for j, (idx, label_text) in enumerate(sample_list):
+            x_sample = x_test[idx:idx + 1]
+            pred = float(model.predict(x_sample, verbose=0).reshape(-1)[0])
+
+            tokens, _ = decode_review(x_sample[0].tolist(), word_index)
+            weights = extract_attention_weights(model, x_sample)
+            if weights is None:
+                print(f"  Sample {label_text}_{j}: attention weights not found.")
+                continue
+
+            filename = f"{_safe_name(model_name)}_{label_text}_{j}.png"
+            save_path = os.path.join(attention_dir, filename)
+            top_items = visualize_attention(tokens, weights, save_path, top_k=top_k)
+
+            true_label = 1 if label_text == "pos" else 0
+            print(f"  Sample {label_text}_{j} | true={true_label} pred={pred:.4f}")
+            if top_items:
+                top_str = ", ".join([f"{w}({weight:.4f})" for w, weight in top_items])
+                print(f"  Top-{len(top_items)}: {top_str}")
 
 
 def run_experiment(config):
@@ -134,7 +177,22 @@ def run_experiment(config):
     results_list = []
     for model_name, trainer in trainers.items():
         results = trainer.evaluate(x_test, y_test)
+        print(
+            f"{model_name} | Test Loss: {results['test_loss']:.4f} "
+            f"| Test Accuracy: {results['test_accuracy']:.4f}"
+        )
         results_list.append(results)
+
+    if config.get('enable_attention_vis', False):
+        word_index = imdb.get_word_index()
+        _run_attention_visualization(
+            trainers,
+            x_test,
+            y_test,
+            config['save_dir'],
+            word_index,
+            top_k=config.get('attention_top_k', 20)
+        )
 
     print("\n【步骤】模型对比分析")
     print("-"*80)
@@ -209,13 +267,13 @@ def main():
     set_seed(42)
 
     # 修改此列表可控制要运行的实验组
-    run_groups = ['classic', 'advanced', 'ultra']
+    run_groups = ['ultra']
 
     configs = [
         {
             'key': 'classic',
-            'title': '经典版',
-            'desc': 'CNN+SimpleRNN/GRU/LSTM（三个基础模型）',
+            'title': '经典组',
+            'desc': 'CNN+SimpleRNN/GRU/LSTM（含CNN-only与RNN-only基线）',
             'get_models': get_all_models,
             'compile_model': compile_model,
             'max_features': 10000,
@@ -226,37 +284,37 @@ def main():
             'learning_rate': 0.001,
             'save_dir': 'results',
             'show_sample': True
+        },
+        {
+            'key': 'advanced',
+            'title': '改进组',
+            'desc': '更深CNN + 双向RNN + BatchNorm/SpatialDropout',
+            'get_models': get_all_advanced_models,
+            'compile_model': compile_advanced_model,
+            'max_features': 20000,
+            'maxlen': 500,
+            'embedding_dim': 256,
+            'batch_size': 64,
+            'epochs': 30,
+            'learning_rate': 0.0005,
+            'save_dir': 'results_advanced'
+        },
+        {
+            'key': 'ultra',
+            'title': '超强组',
+            'desc': '多尺度CNN + 注意力 + TextCNN + BiLSTM（目标95%+）',
+            'get_models': get_all_ultra_models,
+            'compile_model': compile_ultra_model,
+            'max_features': 20000,
+            'maxlen': 300,
+            'embedding_dim': 300,
+            'batch_size': 32,
+            'epochs': 50,
+            'learning_rate': 0.0003,
+            'save_dir': 'results_ultra',
+            'enable_attention_vis': True,
+            'attention_top_k': 20
         }
-        # ,
-        # {
-        #     'key': 'advanced',
-        #     'title': '改进版',
-        #     'desc': '更深CNN + 双向RNN + BatchNorm/SpatialDropout',
-        #     'get_models': get_all_advanced_models,
-        #     'compile_model': compile_advanced_model,
-        #     'max_features': 20000,
-        #     'maxlen': 500,
-        #     'embedding_dim': 256,
-        #     'batch_size': 64,
-        #     'epochs': 30,
-        #     'learning_rate': 0.0005,
-        #     'save_dir': 'results_advanced'
-        # }
-        # ,
-        # {
-        #     'key': 'ultra',
-        #     'title': '超强版',
-        #     'desc': '多尺度CNN + 注意力 + TextCNN + BiLSTM（目标95%+）',
-        #     'get_models': get_all_ultra_models,
-        #     'compile_model': compile_ultra_model,
-        #     'max_features': 20000,
-        #     'maxlen': 500,
-        #     'embedding_dim': 300,
-        #     'batch_size': 32,
-        #     'epochs': 50,
-        #     'learning_rate': 0.0003,
-        #     'save_dir': 'results_ultra'
-        # }
     ]
 
     for cfg in configs:
