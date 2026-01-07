@@ -40,6 +40,8 @@ class ModelTrainer:
         return False
 
     def _get_monitor_metric(self) -> str:
+        if "Ultra" in self.model_name:
+            return "val_auc"
         if self._has_auc_metric():
             return "val_auc"
         return "val_accuracy"
