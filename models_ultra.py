@@ -12,7 +12,7 @@ from tensorflow.keras.layers import (
     Input, Embedding, Conv1D, MaxPooling1D, GlobalMaxPooling1D,
     GlobalAveragePooling1D, LSTM, GRU, Bidirectional, Dense,
     Dropout, Concatenate, SpatialDropout1D, Add, Layer,
-    LayerNormalization, Activation, BatchNormalization
+    LayerNormalization, Activation, BatchNormalization, Lambda
 )
 from tensorflow.keras.regularizers import l2
 from tensorflow.keras.datasets import imdb
@@ -175,11 +175,11 @@ def _residual_block(x, filters, kernel_size, l2_cnn, use_batchnorm=True):
 
 
 def _build_mask_from_inputs(inputs, pool_count=0, pool_size=2):
-    mask = tf.cast(tf.not_equal(inputs, 0), tf.float32)
-    mask = tf.expand_dims(mask, axis=-1)
+    mask = Lambda(lambda x: tf.cast(tf.not_equal(x, 0), tf.float32))(inputs)
+    mask = Lambda(lambda x: tf.expand_dims(x, axis=-1))(mask)
     for _ in range(pool_count):
         mask = MaxPooling1D(pool_size=pool_size, strides=pool_size, padding="valid")(mask)
-    mask = tf.squeeze(mask, axis=-1)
+    mask = Lambda(lambda x: tf.squeeze(x, axis=-1))(mask)
     return mask
 
 
