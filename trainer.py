@@ -51,8 +51,14 @@ class ModelTrainer:
         若 optimizer 使用 LearningRateSchedule（WarmupCosineSchedule 等），
         不应再叠加 ReduceLROnPlateau。
         """
-        lr = self.model.optimizer.learning_rate
-        return not isinstance(lr, tf.keras.optimizers.schedules.LearningRateSchedule)
+        opt = self.model.optimizer
+        lr_attr = getattr(opt, "learning_rate", None)
+        base_lr = getattr(opt, "_learning_rate", None)
+        if isinstance(lr_attr, tf.keras.optimizers.schedules.LearningRateSchedule):
+            return False
+        if isinstance(base_lr, tf.keras.optimizers.schedules.LearningRateSchedule):
+            return False
+        return True
 
     def train(self, x_train, y_train, x_val, y_val,
               epochs=20, batch_size=128, verbose=1):
