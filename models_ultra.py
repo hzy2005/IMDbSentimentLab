@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 增强说明:
 - Masked Attention 支持 padding mask 并对齐 CNN 池化后的时间步
@@ -493,7 +495,7 @@ def compile_ultra_model(model, learning_rate=0.0003, steps_per_epoch=None, epoch
         total_steps = 50000
     warmup_steps = int(0.1 * total_steps)
     warmup_steps = max(200, min(2000, warmup_steps))
-    end_lr = base_lr * 0.05
+    end_lr = base_lr * 0.1
     if os.environ.get("DEBUG_LR") == "1":
         print(f"[LR] total_steps={total_steps} warmup_steps={warmup_steps} "
               f"base_lr={base_lr} end_lr={end_lr}")
@@ -507,12 +509,18 @@ def compile_ultra_model(model, learning_rate=0.0003, steps_per_epoch=None, epoch
     optimizer = None
     try:
         optimizer = tf.keras.optimizers.AdamW(
-            learning_rate=lr_schedule, weight_decay=5e-5, clipnorm=1.0
+            learning_rate=lr_schedule, weight_decay=1e-4, clipnorm=1.0
         )
     except Exception:
         optimizer = Adam(learning_rate=lr_schedule, clipnorm=1.0)
 
-    loss_fn = tf.keras.losses.BinaryCrossentropy(label_smoothing=0.02)
+    # try:
+    #     from tensorflow.keras.optimizers.experimental import ExponentialMovingAverage
+    #     optimizer = ExponentialMovingAverage(optimizer, decay=0.999)
+    # except Exception:
+    #     pass
+
+    loss_fn = tf.keras.losses.BinaryCrossentropy(label_smoothing=0.01)
 
     model.compile(
         optimizer=optimizer,

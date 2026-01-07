@@ -1,10 +1,14 @@
+# -*- coding: utf-8 -*-
+
 """
 模型训练和评估模块
 """
+
+import os
 import numpy as np
 import time
 import tensorflow as tf
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
 
 
 class ModelTrainer:
@@ -71,13 +75,28 @@ class ModelTrainer:
         print(f"监控指标: {monitor_metric}")
 
         patience = 8 if "Ultra" in self.model_name else 5
+        # ckpt_dir = os.path.join("results_ultra", "checkpoints")
+        ckpt_dir = os.path.join("checkpoints")
+        os.makedirs(ckpt_dir, exist_ok=True)
+        # ckpt_path = os.path.join(ckpt_dir, f"{self.model_name}.weights.h5")
+        safe_name = self.model_name.replace("+", "_").replace(" ", "_")
+        ckpt_path = os.path.join(ckpt_dir, f"{safe_name}.weights.h5")
+
         callbacks = [
             EarlyStopping(
                 monitor=monitor_metric,
                 mode="max",
                 patience=patience,
-                min_delta=0.0005,
-                restore_best_weights=True,
+                min_delta=0.001,
+                restore_best_weights=False,
+                verbose=1
+            ),
+            ModelCheckpoint(
+                filepath=ckpt_path,
+                monitor=monitor_metric,
+                mode="max",
+                save_best_only=True,
+                save_weights_only=True,
                 verbose=1
             )
         ]
@@ -108,6 +127,8 @@ class ModelTrainer:
         )
 
         self.train_time = time.time() - start_time
+        if os.path.exists(ckpt_path):
+            self.model.load_weights(ckpt_path)
         print(f"\n训练完成！耗时: {self.train_time:.2f}秒")
 
         return self.history

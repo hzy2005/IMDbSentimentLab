@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import tensorflow as tf
 
 from models_ultra import AttentionLayer
 
